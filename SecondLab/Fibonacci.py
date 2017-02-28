@@ -41,27 +41,22 @@ del TMINs[0]
 
 
 @app.route("/historical")
-
 # five test cases: n=10, n=-1, no parameter, malformed parameters
 def historical():
-	date = None
-	try:date=int(request.args.get())
-	except:
-		all_dates=""
-		for date in dates:
-			all_dates += "Date:"+date+"\n"
-		return all_dates
-	if(date is not None):
-		try:
-			value = dates.index(date)
-			info_message = "Date:"+dates[value]+" TMAX:"+TMAXs[value]+" TMIN:"+TMINs[value]
-			return(jsonify({'info': info_message}))
-		except:
-			error_message = "HTTP Error code 404"
-			return(jsonify({'error': error_message}))
+	all_dates=""
+	for date in dates:
+		all_dates += "Date:"+date+"\n"
+	return jsonify({'info': all_dates})
 	
-
-
+@app.route('/historical/<date_id>',methods=['GET'])
+def get_date(date_id):
+	try:
+		value = dates.index(date_id)
+		info_message = "Date:"+dates[value]+" TMAX:"+TMAXs[value]+" TMIN:"+TMINs[value]
+		return(jsonify({'info': info_message}))
+	except:
+		error_message = "HTTP Error code 404"
+		return(jsonify({'error': error_message}))
 
 @app.route("/fibonacci")
 
