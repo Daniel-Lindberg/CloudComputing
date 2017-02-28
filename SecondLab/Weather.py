@@ -59,8 +59,12 @@ def get_date(date_id):
 
 @app.route('/historical/data_info',methods=['POST'])
 def post_date(date_info):
-	print "I am borris"
 	print date_info
+	#TO ADD: get date info to give a date, tmax and tmin
+	with open(r'daily.csv','a') as csvfile:
+		spamwriter = csv.writer(csvfile)
+		spamwriter.writerow([])
+		spamwriter.writerow([date,tmax,tmin])
 
 @app.route('/forecast/<date_id>',methods=['GET'])
 def get_forecast(date_id):

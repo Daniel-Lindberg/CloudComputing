@@ -17,6 +17,13 @@ with open('daily.csv','rb') as csvfile:
 del date[0]
 del TMAX[0]
 del TMIN[0]
-print "Date:", date
-print "Tmax:",TMAX
-print "Tmin:",TMIN					
+
+import random
+print random.randint(0,3)
+
+"""
+with open(r'daily3.csv','a') as csvfile:
+	spamwriter=csv.writer(csvfile)
+	spamwriter.writerow([])
+	spamwriter.writerow(['20170227','34','27'])
+"""					
