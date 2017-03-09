@@ -108,15 +108,23 @@ def get_forecast(date_id):
 		date_return.append(str(dates[value]))
 		tmax_return.append(str(t_max))
 		tmin_return.append(str(t_min))
-		for x in range(1,8):	
+		for x in range(1,7):	
 			new_days.append(int(dates[value])+x)
 		for x in new_days:
 			new_tmax = float(t_max)+random.randint(-3,3)
 			new_tmin = float(t_min)+random.randint(-3,3)
-			date_return.append(str(x))
+			date_return.append(int(x))
 			tmax_return.append(float(new_tmax))
 			tmin_return.append(float(new_tmin))
-		return jsonify({'DATE':date_return[0], 'TMAX':tmax_return[0],'TMIN':tmin_return[0],'DATE':date_return[1], 'TMAX':tmax_return[1],'TMIN':tmin_return[1],'DATE':date_return[2], 'TMAX':tmax_return[2],'TMIN':tmin_return[2],'DATE':date_return[3], 'TMAX':tmax_return[3],'TMIN':tmin_return[3],'DATE':date_return[4], 'TMAX':tmax_return[4],'TMIN':tmin_return[4],'DATE':date_return[5], 'TMAX':tmax_return[5],'TMIN':tmin_return[5],'DATE':date_return[6], 'TMAX':tmax_return[6],'TMIN':tmin_return[6],'DATE':date_return[7], 'TMAX':tmax_return[7],'TMIN':tmin_return[7]})
+		json_list = []
+		for i in range(0,len(date_return)):
+			temp_list = []
+			temp_list.append({'DATE':int(date_return[i])})
+			temp_list.append({'TMAX':float(tmax_return[i])})
+			temp_list.append({'TMIN':float(tmin_return[i])})
+			json_list.append(temp_list)	
+		return jsonify(json_list)
+		
 	except:
 		error_message = 'HTTP Error code 404'
 		return jsonify({'error':error_message},404)
