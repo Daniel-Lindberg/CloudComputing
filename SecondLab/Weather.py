@@ -19,111 +19,107 @@ from flask import Flask, jsonify, request
 app = Flask(__name__)
 
 app.config.from_envvar('FNOC_SETTINGS', silent=True)
-import json
+import sys
 import random
 import csv
 import os
 import re
+import json
 
-dates = []
-TMAXs = []
-TMINs = []
-with open('daily.csv','rb') as csvfile:
-        spamreader=csv.reader(csvfile,delimiter=' ',quotechar="|")
-        for row in spamreader:
-                for column in row:
-                        splitStr = (column.split(","))
-                        dates.append(splitStr[0])
-                        TMAXs.append(splitStr[1])
-                        TMINs.append(splitStr[2])
+def readCSV():
+	dates = []
+	TMAXs = []
+	TMINs = []
+	with open('daily.csv','rb') as csvfile:
+        	spamreader=csv.reader(csvfile,delimiter=' ',quotechar="|")
+       		for row in spamreader:
+                	for column in row:
+                        	splitStr = (column.split(","))
+                       		dates.append(splitStr[0])
+                       		TMAXs.append(splitStr[1])
+                       		TMINs.append(splitStr[2])
+	return dates,TMAXs,TMINs
 
-del dates[0]
-del TMAXs[0]
-del TMINs[0]
-
-@app.route("/historical")
+@app.route("/historical/")
 # five test cases: n=10, n=-1, no parameter, malformed parameters
-def historical():	
+def historical():
+	dates,TMAXs,TMINs = readCSV()	
 	json_list = []
 	for date in dates:
-		json_list.append({'Date':date})
-	return json.dumps(json_list)
+		json_list.append({'DATE':date})
+	return jsonify(json_list)
 	
 @app.route('/historical/<date_id>',methods=['GET'])
 def get_date(date_id):
+	dates,TMAXs,TMINs = readCSV()
 	try:
-		json_list = []
 		value = dates.index(date_id)
-		json_list.append({"Date":dates[value]})
-		json_list.append({"TMAX":TMAXs[value]})
-		json_list.append({"TMIN":TMINs[value]})
-		return json.dumps(json_list)
+		return jsonify({'DATE':dates[value],'TMAX':float(TMAXs[value]),'TMIN':float(TMINs[value])})
 	except:
-		error_message = "HTTP Error code 404"
-		return (jsonify({'error': error_message}))
+		error_message = 'HTTP Error code 404'
+		return (jsonify({'error': error_message}),404)
 
-@app.route('/historical/<data_info>',methods=['POST'])
-def post_date(data_info):
-	date, temp_tmax, temp_tmin= request.get_data().split(',')
-	date_value = re.findall(r'\d+', date)
-	tmax_value = re.findall(r'\d+',temp_tmax)
-	tmin_value = re.findall(r'\d+',temp_tmin)
-	date_value = date_value[0]
-	tmax_value = tmax_value[0]
-	tmin_value = tmin_value[0]
+@app.route('/historical/',methods=['POST'])
+def post_date():
+	data= request.get_json()
+	date_value = data['DATE']
+	tmax_value = data['TMAX']
+	tmin_value = data['TMIN']
 	with open(r'daily.csv','a') as csvfile:
                 spamwriter = csv.writer(csvfile)
                 spamwriter.writerow([])
                 spamwriter.writerow([str(date_value),str(tmax_value),str(tmin_value)])	
-	return (jsonify({'Post':'Response'}))
+	return (jsonify({'DATE':(date_value),'TMAX':int(tmax_value),'TMIN':int(tmin_value)}),201)
 
 @app.route('/historical/<data_id>',methods=['DELETE'])
 def delete_date(data_id):
-	inputCSV=open('daily.csv','rb')
-	outputCSV=open('daily2.csv','wb')
-	writer=csv.writer(outputCSV)
+	dates,TMAXs,TMINs = readCSV()
 	deleted = False
-	for row in csv.reader(inputCSV):
-		if row[0]!='DATE':
-			if row[0] != data_id:
-				writer.writerow(row)
-			else:
-				value = dates.index(date_id)
-				del dates[value]
-				del TMAXs[value]
-				del TMINs[value]
-				deleted=True
-	os.system('cp daily2.csv daily.csv')
-	return jsonify({'Deleted Result':deleted})	
+	csvfile=open('daily2.csv','wt')
+	try:
+		writer = csv.writer(csvfile)
+		value = dates.index(data_id)
+		del dates[value]
+		del TMAXs[value]
+		del TMINs[value]
+		deleted = True
+		for index in range(0 ,len(dates)):
+			writer.writerow(([dates[index],TMAXs[index],TMINs[index]]))
+		csvfile.close();	
+		os.system('cp daily2.csv daily.csv')
+		return jsonify({'Deleted Result': deleted})		
+	except Exception as inst:
+		return jsonify({'Error':'Value does not exit'})
+	
 
 
 @app.route('/forecast/<date_id>',methods=['GET'])
 def get_forecast(date_id):
+	dates,TMAXs,TMINs = readCSV()
 	try:
 		value = dates.index(date_id)
 		new_days = []
 		t_max = TMAXs[value]
 		t_min = TMINs[value]
 		forecast = []
-		fun_string =[]
-		fun_string.append({'Date':str(dates[value])})
-		fun_string.append({'TMAX':str(t_max)})
-		fun_string.append({'TMIN':str(t_min)})
-		forecast.append(fun_string)
-		for x in range(1,8):
+		date_return = []
+		tmax_return = []
+		tmin_return = []
+		date_return.append(str(dates[value]))
+		tmax_return.append(str(t_max))
+		tmin_return.append(str(t_min))
+		for x in range(1,8):	
 			new_days.append(int(dates[value])+x)
 		for x in new_days:
-			new_tmax = int(t_max)+random.randint(-3,3)
-			new_tmin = int(t_min)+random.randint(-3,3)
-			forecast_string = []
-			forecast_string.append({'Date':str(x)})
-			forecast_string.append({'TMAX':str(new_tmax)})
-			forecast_string.append({'TMIN:':str(new_tmin)})
-			forecast.append(forecast_string)
-		return json.dumps(forecast)
+			new_tmax = float(t_max)+random.randint(-3,3)
+			new_tmin = float(t_min)+random.randint(-3,3)
+			date_return.append(str(x))
+			tmax_return.append(float(new_tmax))
+			tmin_return.append(float(new_tmin))
+		return jsonify({'DATE':date_return[0], 'TMAX':tmax_return[0],'TMIN':tmin_return[0],'DATE':date_return[1], 'TMAX':tmax_return[1],'TMIN':tmin_return[1],'DATE':date_return[2], 'TMAX':tmax_return[2],'TMIN':tmin_return[2],'DATE':date_return[3], 'TMAX':tmax_return[3],'TMIN':tmin_return[3],'DATE':date_return[4], 'TMAX':tmax_return[4],'TMIN':tmin_return[4],'DATE':date_return[5], 'TMAX':tmax_return[5],'TMIN':tmin_return[5],'DATE':date_return[6], 'TMAX':tmax_return[6],'TMIN':tmin_return[6],'DATE':date_return[7], 'TMAX':tmax_return[7],'TMIN':tmin_return[7]})
 	except:
 		error_message = 'HTTP Error code 404'
-		return jsonify({'error':error_message})
+		return jsonify({'error':error_message},404)
 
 if __name__ == "__main__":
 	app.run(host='0.0.0.0')
