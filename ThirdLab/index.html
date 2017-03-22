@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title> Forecaster </title>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
+</script>
+<script>
+function loadDoc() {
+var bla = $('#forecast_id').val();
+var initialUrl = "http://52.33.88.132:5000/forecast/";
+var finalURL= initialUrl.concat(bla);
+$.ajax({
+//header:{'Access-Control-Allow-Origin': 'http://52.33.88.132:5000/*'},
+header:{'Access-Control-Allow-Origin': '*'},
+type: "GET",
+url:finalURL,
+dataType: "json",
+success: function(resp){
+// we have the response
+alert(JSON.stringify(resp));
+ $('#result_id').append(JSON.stringify(resp));
+
+},
+error: function(e){
+alert('Error: ' + e);
+}
+});
+}
+
+
+</script>
+</head>
+<body>
+
+<h1> Daniel Lindberg's Weather Service  </h1>
+
+<p class= "forecast-info">Input a date as YYYYMMDD, Ex: 20130101</p>
+<input type="text" id="forecast_id"/>
+<button onclick="loadDoc()">Get Forecast </button>
+<p type="text" id="result_id"/>
+</body>
+</html>

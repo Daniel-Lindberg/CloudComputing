@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title> Hello jQuery </title>
+ <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
+</script>
+<script>
+function loadDoc() {
+$.ajax({
+alert('Success');
+var bla = $('#forecast_id').val();
+var initialUrl = "http://52.33.88.132:5000/historical/".concat(bla);
+type: "GET",
+
+url:initialUrl,
+dataType: "json",
+success: function(resp){
+// we have the response
+ $('#result_id').val(resp);
+
+},
+error: function(e){
+alert('Error: ' + e);
+}
+});
+}
+
+
+</script>
+
+
+</head>
+<body>
+
+<h1> Daniel Lindberg's Homepage </h1>
+
+<p class= "forecast-info">Input a date as YYYYMMDD, Ex: 20130101</p>
+<input type="text" id="forecast_id"> </input>
+<button onclick="loadDoc()">Get Forecast </button>
+<p type="text" id="result_id"> </p>
+</body>
+</html>
