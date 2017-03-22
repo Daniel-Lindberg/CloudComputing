@@ -15,16 +15,52 @@ url:finalURL,
 dataType: "json",
 success: function(resp){
 // we have the response
+ tableData="";
  jsonResp = JSON.stringify(resp);
- document.getElementById("data").innerHTML = jsonResp;
- $('#result_id').val(data);
+ len = resp.length;
+ if(len > 0) {
+     for(var i = 0; i < len; i++) {
+        if(resp[i][0].DATE && resp[i][1].TMAX && resp[i][2].TMIN) {
+  
+	tableData += "<tr><td>" + JSON.stringify(resp[i][0].DATE) + "</td><td>" + JSON.stringify(resp[i][1].TMAX) + "</td><td>" + JSON.stringify(resp[i][2].TMIN) + "</td></tr>";
+        }
+     }
+ }
 
+document.getElementById("data").innerHTML = tableData;
+$('#result_id').val(resp);
 },
 error: function(e){
 alert('Error: ' + e);
 }
 });
 }
+
+function loadHistorical(){
+var bla = $('#historical_id').val();
+var initialUrl = "http://52.33.88.132:5000/historical/";
+var finalURL= initialUrl.concat(bla);
+$.ajax({
+type: "GET",
+url:finalURL,
+dataType: "json",
+success: function(resp){
+// we have the response
+ tableData="";
+ jsonResp = JSON.stringify(resp);
+ len = resp.length;
+ tableData += "<tr><td>" + JSON.stringify(resp.DATE) + "</td><td>" + JSON.stringify(resp.TMAX) + "</td><td>" + JSON.stringify(resp.TMIN) + "</td></tr>";
+
+
+document.getElementById("data").innerHTML = tableData;
+$('#result_id').val(resp);
+},
+error: function(e){
+alert('Error: ' + e);
+}
+});
+}
+
 
 
 </script>
@@ -36,8 +72,11 @@ alert('Error: ' + e);
 <p class= "forecast-info">Input a date as YYYYMMDD, Ex: 20130101</p>
 <input type="text" id="forecast_id"/>
 <button onclick="loadForecast()">Get Forecast </button>
+<input type="text" id="historical_id"/>
+<button onclick="loadHistorical()">Get Historical </button>
 <p type="text" id="result_id"/>
-<div id="data">
-</div>
+<div> Table:</br> Date TMAX TMIN </div>
+<table id="data">
+</table>
 </body>
 </html>
