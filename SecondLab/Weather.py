@@ -14,7 +14,7 @@
 #
 #
 ##############################################################
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
@@ -25,6 +25,11 @@ import csv
 import os
 import re
 import json
+
+@app.route('/')
+def main():
+        return open('index.html','r').read()
+
 
 def readCSV():
 	dates = []

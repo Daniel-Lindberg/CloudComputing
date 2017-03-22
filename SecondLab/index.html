@@ -10,15 +10,14 @@ var bla = $('#forecast_id').val();
 var initialUrl = "http://52.33.88.132:5000/forecast/";
 var finalURL= initialUrl.concat(bla);
 $.ajax({
-//header:{'Access-Control-Allow-Origin': 'http://52.33.88.132:5000/*'},
-header:{'Access-Control-Allow-Origin': '*'},
 type: "GET",
 url:finalURL,
 dataType: "json",
 success: function(resp){
 // we have the response
-alert(JSON.stringify(resp));
- $('#result_id').append(JSON.stringify(resp));
+ jsonResp = JSON.stringify(resp);
+ document.getElementById("data").innerHTML = jsonResp;
+ $('#result_id').val(data);
 
 },
 error: function(e){
@@ -38,5 +37,7 @@ alert('Error: ' + e);
 <input type="text" id="forecast_id"/>
 <button onclick="loadDoc()">Get Forecast </button>
 <p type="text" id="result_id"/>
+<div id="data">
+</div>
 </body>
 </html>
