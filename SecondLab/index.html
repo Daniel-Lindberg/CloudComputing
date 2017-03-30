@@ -4,6 +4,9 @@
  <title> Forecaster </title>
  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js">
 </script>
+<script type="text/javascript" src="static/canvasjs.min.js">
+</script>
+<script src="https://query.yahooapis.com/v1/public/yql?q=select wind from weather.forecast where woeid in (select woeid from geo.places(1) where text='chicago, il')&format=json&callback=callbackFunction"></script>
 <script>
 function loadForecast() {
 var bla = $('#forecast_id').val();
@@ -15,6 +18,7 @@ url:finalURL,
 dataType: "json",
 success: function(resp){
 // we have the response
+ graphIt(resp);
  tableData="";
  jsonResp = JSON.stringify(resp);
  len = resp.length;
@@ -64,6 +68,302 @@ alert('Error: ' + e);
 
 
 </script>
+<script>
+  function forecastDaily() {
+            var initialUrl =
+                "https://query.yahooapis.com/v1/public/yql?q=select%20item%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D%22cincinnati%2C%20oh%22)&format=json&env=store%3A%2F%2Fdatatables.org%2Falltableswithkeys";
+            var finalURL = initialUrl;
+            $.ajax({
+                type: "GET",
+                url: finalURL,
+                dataType: "json",
+                success: function(data) {
+                    var forecast = data.query.results.channel.item.forecast;
+                    len = forecast.length;
+                    max = [];
+                    min = [];
+                    date = []
+                    
+                    for (var i = 0; i < len; i++) {
+                        max.push(parseFloat(forecast[i].high))
+                        min.push(parseFloat(forecast[i].low))
+                        date.push(forecast[i].date)
+
+                    }
+
+
+
+                    var chart = new CanvasJS.Chart("chartContainer", {
+
+                        title: {
+                            text: "Yahoo Weather Forecast",
+                            fontSize: 30
+                        },
+                        animationEnabled: true,
+                        axisX: {
+
+                            gridColor: "Silver",
+                            tickColor: "silver",
+
+
+
+                        },
+                        toolTip: {
+                            shared: true
+                        },
+                        theme: "theme2",
+                        axisY: {
+                            gridColor: "Silver",
+                            tickColor: "silver"
+                        },
+                        legend: {
+                            verticalAlign: "center",
+                            horizontalAlign: "right"
+                        },
+                        data: [{
+                                type: "line",
+                                showInLegend: true,
+                                lineThickness: 2,
+                                name: "MaxTemperature",
+                                markerType: "square",
+                                color: "#F08080",
+                                dataPoints: [{
+                                        label: date[0],
+                                        y: max[0]
+                                    },
+                                    {
+                                        label: date[1],
+                                        y: max[1]
+                                    },
+                                    {
+                                        label: date[2],
+                                        y: max[2]
+                                    },
+                                    {
+                                        label: date[3],
+                                        y: max[3]
+                                    },
+                                    {
+                                        label: date[4],
+                                        y: max[4]
+                                    },
+                                    {
+                                        label: date[5],
+                                        y: max[5]
+                                    },
+                                    {
+                                        label: date[6],
+                                        y: max[6]
+                                    }
+                                ]
+                            },
+                            {
+                                type: "line",
+                                showInLegend: true,
+                                name: "MinTemp",
+                                color: "#20B2AA",
+                                lineThickness: 2,
+
+                                dataPoints: [{
+                                        label: date[0],
+                                        y: min[0]
+                                    },
+                                    {
+                                        label: date[1],
+                                        y: min[1]
+                                    },
+                                    {
+                                        label: date[2],
+                                        y: min[2]
+                                    },
+                                    {
+                                        label: date[3],
+                                        y: min[3]
+                                    },
+                                    {
+                                        label: date[4],
+                                        y: min[4]
+                                    },
+                                    {
+                                        label: date[5],
+                                        y: min[5]
+                                    },
+                                    {
+                                        label: date[6],
+                                        y: min[6]
+                                    }
+                                ]
+                            }
+
+
+                        ],
+                        legend: {
+                            cursor: "pointer",
+                            itemclick: function(e) {
+                                if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                                    e.dataSeries.visible = false;
+                                } else {
+                                    e.dataSeries.visible = true;
+                                }
+                                chart.render();
+                            }
+                        }
+                    });
+
+                    chart.render();
+
+
+
+                },
+                error: function(e) {
+                    alert('Error: ' + e);
+                }
+            });
+        }
+</script>
+<script type="text/javascript">
+    function graphIt(forecastList) {
+
+            len = forecastList.length;
+
+            max = [];
+            min = [];
+            year = [];
+            month = [];
+            day = [];
+
+            for (var i = 0; i < len; i++) {
+                max.push(forecastList[i][1].TMAX)
+                min.push(forecastList[i][2].TMIN)
+
+                year.push(parseInt(forecastList[i][0].DATE.toString().substr(0, 4)));
+                month.push((parseInt(forecastList[i][0].DATE.toString().substr(4, 2))) - 1);
+                day.push(parseInt(forecastList[i][0].DATE.toString().substr(6, 2)));
+
+
+
+
+            }
+            var chart = new CanvasJS.Chart("chartContainer", {
+
+                title: {
+                    text: "Weather Forecast",
+                    fontSize: 30
+                },
+                animationEnabled: true,
+                axisX: {
+
+                    gridColor: "Silver",
+                    tickColor: "silver",
+
+                    valueFormatString: "MMM/DD/YYYY"
+
+                },
+                toolTip: {
+                    shared: true
+                },
+                theme: "theme2",
+                axisY: {
+                    gridColor: "Silver",
+                    tickColor: "silver"
+                },
+                legend: {
+                    verticalAlign: "center",
+                    horizontalAlign: "right"
+                },
+                data: [{
+                        type: "line",
+                        showInLegend: true,
+                        lineThickness: 2,
+                        name: "MaxTemperature",
+                        markerType: "square",
+                        color: "#F08080",
+                        dataPoints: [{
+                                x: new Date(year[0], month[0], day[0]),
+                                y: max[0]
+                            },
+                            {
+                                x: new Date(year[1], month[1], day[1]),
+                                y: max[1]
+                            },
+                            {
+                                x: new Date(year[2], month[2], day[2]),
+                                y: max[2]
+                            },
+                            {
+                                x: new Date(year[3], month[3], day[3]),
+                                y: max[3]
+                            },
+                            {
+                                x: new Date(year[4], month[4], day[4]),
+                                y: max[4]
+                            },
+                            {
+                                x: new Date(year[5], month[5], day[5]),
+                                y: max[5]
+                            },
+                            {
+                                x: new Date(year[6], month[6], day[6]),
+                                y: max[6]
+                            }
+                        ]
+                    },
+                    {
+                        type: "line",
+                        showInLegend: true,
+                        name: "MinTemp",
+                        color: "#20B2AA",
+                        lineThickness: 2,
+
+                        dataPoints: [{
+                                x: new Date(year[0], month[0], day[0]),
+                                y: min[0]
+                            },
+                            {
+                                x: new Date(year[1], month[1], day[1]),
+                                y: min[1]
+                            },
+                            {
+                                x: new Date(year[2], month[2], day[2]),
+                                y: min[2]
+                            },
+                            {
+                                x: new Date(year[3], month[3], day[3]),
+                                y: min[3]
+                            },
+                            {
+                                x: new Date(year[4], month[4], day[4]),
+                                y: min[4]
+                            },
+                            {
+                                x: new Date(year[5], month[5], day[5]),
+                                y: min[5]
+                            },
+                            {
+                                x: new Date(year[6], month[6], day[6]),
+                                y: min[6]
+                            }
+                        ]
+                    }
+
+
+                ],
+                legend: {
+                    cursor: "pointer",
+                    itemclick: function(e) {
+                        if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+                            e.dataSeries.visible = false;
+                        } else {
+                            e.dataSeries.visible = true;
+                        }
+                        chart.render();
+                    }
+                }
+            });
+
+            chart.render();
+        }
+</script>
 </head>
 <body BGCOLOR='GREEN'>
 
@@ -72,11 +372,12 @@ alert('Error: ' + e);
 <p class= "forecast-info">Input a date as YYYYMMDD, Ex: 20130101</p>
 <input type="text" id="forecast_id"/>
 <button onclick="loadForecast()">Get Forecast </button>
-<input type="text" id="historical_id"/>
-<button onclick="loadHistorical()">Get Historical </button>
+<button onclick="forecastDaily()">Get Weekly Forecast from Yahoo **Bonus**</button>
+
 <p type="text" id="result_id"/>
 <div> Table:</br> Date TMAX TMIN </div>
 <table id="data">
 </table>
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
 </body>
 </html>
