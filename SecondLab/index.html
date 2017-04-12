@@ -10,7 +10,7 @@
 <script>
 function loadForecast() {
 var bla = $('#forecast_id').val();
-var initialUrl = "http://52.33.88.132:5000/forecast/";
+var initialUrl = window.location.href +"forecast/";
 var finalURL= initialUrl.concat(bla);
 $.ajax({
 type: "GET",
